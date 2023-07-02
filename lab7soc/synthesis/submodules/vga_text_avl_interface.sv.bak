@@ -1,0 +1,161 @@
+/************************************************************************
+Avalon-MM Interface VGA Text mode display
+
+Register Map:
+0x000-0x0257 : VRAM, 80x30 (2400 byte, 600 word) raster order (first column then row)
+0x258        : control register
+
+VRAM Format:
+X->
+[ 31  30-24][ 23  22-16][ 15  14-8 ][ 7    6-0 ]
+[IV3][CODE3][IV2][CODE2][IV1][CODE1][IV0][CODE0]
+
+IVn = Draw inverse glyph
+CODEn = Glyph code from IBM codepage 437
+
+Control Register Format:
+[[31-25][24-21][20-17][16-13][ 12-9][ 8-5 ][ 4-1 ][   0    ] 
+[[RSVD ][FGD_R][FGD_G][FGD_B][BKG_R][BKG_G][BKG_B][RESERVED]
+
+VSYNC signal = bit which flips on every Vsync (time for new frame), used to synchronize software
+BKG_R/G/B = Background color, flipped with foreground when IVn bit is set
+FGD_R/G/B = Foreground color, flipped with background when Inv bit is set
+
+************************************************************************/
+`define NUM_REGS 601 //80*30 characters / 4 characters per register
+`define CTRL_REG 600 //index of control register
+
+module vga_text_avl_interface (
+	// Avalon Clock Input, note this clock is also used for VGA, so this must be 50Mhz
+	// We can put a clock divider here in the future to make this IP more generalizable
+	input logic CLK,
+	
+	// Avalon Reset Input
+	input logic RESET,
+	
+	// Avalon-MM Slave Signals
+	input  logic AVL_READ,					// Avalon-MM Read
+	input  logic AVL_WRITE,					// Avalon-MM Write
+	input  logic AVL_CS,					// Avalon-MM Chip Select
+	input  logic [3:0] AVL_BYTE_EN,			// Avalon-MM Byte Enable
+	input  logic [9:0] AVL_ADDR,			// Avalon-MM Address
+	input  logic [31:0] AVL_WRITEDATA,		// Avalon-MM Write Data
+	output logic [31:0] AVL_READDATA,		// Avalon-MM Read Data
+	
+	// Exported Conduit (mapped to VGA port - make sure you export in Platform Designer)
+	output logic [3:0]  red, green, blue,	// VGA color channels (mapped to output pins in top-level)
+	output logic hs, vs						// VGA HS/VS
+);
+
+logic [31:0] LOCAL_REG; // Registers
+//put other local variables here
+logic Reset_h, vssig, blank, sync, pixelclk;
+logic [9:0] drawxsig, drawysig;
+logic[9:0] cx, cy, offsetx;
+logic [6:0] char;
+logic [11:0] id;
+logic [31:0] val, register;
+logic [10:0] fontaddr;
+logic iv, out;
+logic [0:7] data;
+logic [2:0] pixx;
+logic [3:0] pixy;
+
+//Declare submodules..e.g. VGA controller, ROMS, etc
+
+
+ram ra(
+	.address_a(AVL_ADDR),
+	.address_b(id),
+	.byteena_a(AVL_BYTE_EN),
+	.clock(CLK),
+	.data_a(AVL_WRITEDATA),
+	.data_b(1'b0),
+	.wren_a(AVL_WRITE && AVL_CS),
+	.wren_b(1'b0),
+	.rden_a(AVL_READ && AVL_CS),
+	.rden_b(1'b1),
+	.q_a(AVL_READDATA),
+	.q_b(LOCAL_REG));
+vga_controller	VGAAAAAAAA (.Clk(CLK), .Reset(Reset_h), .hs(hs), .vs(vs), .pixel_clk(pixelclk), .blank(blank), .sync(sync), .DrawX(drawxsig), .DrawY(drawysig));
+font_rom fo (.addr(fontaddr), .data(data));	
+// Read and write from AVL interface to register block, note that READ waitstate = 1, so this should be in always_ff
+//always_ff @(posedge CLK) begin
+//	if(AVL_CS && AVL_WRITE)
+//	begin
+//		if(AVL_BYTE_EN[0]) LOCAL_REG[7:0] <= AVL_WRITEDATA[7:0];
+//		if(AVL_BYTE_EN[1]) LOCAL_REG[15:8] <= AVL_WRITEDATA[15:8];
+//		if(AVL_BYTE_EN[2]) LOCAL_REG[23:16] <= AVL_WRITEDATA[23:16];
+//		if(AVL_BYTE_EN[3]) LOCAL_REG[31:24] <= AVL_WRITEDATA[31:24];
+//	end
+//	
+//	if(AVL_CS && AVL_READ) AVL_READDATA <= LOCAL_REG[AVL_ADDR];
+//	
+//	else if(RESET)
+//	begin
+//		logic [9:0] i;
+//		for(i = 0; i<601; i++)
+//		begin
+//			LOCAL_REG[i] <= 0;
+//		end
+//	end
+//	
+//end
+
+
+
+
+
+
+
+//handle drawing (may either be combinational or sequential - or both).
+
+always_comb
+begin
+	cx = drawxsig >> 3;
+	cy = drawysig >> 4;
+	register = (cy * 80) + cx; // which register
+	id = ((cy * 80) + cx) >> 1; // the n of CODEn
+//	pixelx = drawxsig[3:0];
+//	pixely = drawysig[4:0];
+
+	if(register[0] == 'd0) begin
+	char = LOCAL_REG[14:8];
+	iv = LOCAL_REG[5];
+	end
+	else if(register[1] == 'd1) begin
+	char = LOCAL_REG[30:24];
+	iv = LOCAL_REG[31];
+	end
+//	else if(register[1:0] == 'd2) begin
+//	char = LOCAL_REG[22:16];
+//	iv = LOCAL_REG[23];
+//	end
+//	else begin
+//	char = LOCAL_REG[30:24];
+//	iv = LOCAL_REG[31];
+//	end
+	pixx = drawxsig[2:0];
+	pixy = drawysig[3:0];
+	fontaddr = (char * 16) + pixy;
+end
+always_ff @(posedge pixelclk)
+begin
+		red <= 0;
+		blue <= 0;
+		green <= 0;
+	if(blank)begin
+		if(data[pixx] ^ iv == 0) begin
+			red <= 'hf;//LOCAL_REG[600][12:9];
+			blue <= 0;//LOCAL_REG[600][4:1];
+			green <= 0;//LOCAL_REG[600][8:5];
+		end
+		else begin
+			red <= 0;//LOCAL_REG[600][24:21];
+			blue <= 'hf;//LOCAL_REG[600][16:13];
+			green <= 0;//LOCAL_REG[600][20:17];
+		end
+	end
+end
+
+endmodule

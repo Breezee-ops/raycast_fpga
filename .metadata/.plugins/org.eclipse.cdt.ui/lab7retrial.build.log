@@ -1,0 +1,71 @@
+23:50:33 **** Incremental Build of configuration Nios II for project lab7retrial ****
+make all 
+Info: Building ../lab7retrial_bsp/
+C:/intelFPGA_lite/18.1/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../lab7retrial_bsp/
+[BSP build complete]
+Info: Compiling main.c to obj/default/main.o
+nios2-elf-gcc -xc -MP -MMD -c -I../lab7retrial_bsp//HAL/inc -I../lab7retrial_bsp/ -I../lab7retrial_bsp//drivers/inc  -pipe -D__hal__ -DALT_NO_INSTRUCTION_EMULATION -DALT_SINGLE_THREADED    -O0 -g -Wall   -mno-hw-div -mno-hw-mul -mno-hw-mulx -mgpopt=global  -o obj/default/main.o main.c
+In file included from main.c:8:0:
+../lab7retrial_bsp/system.h:590:41: warning: initialization makes pointer from integer without a cast [-Wint-conversion]
+ #define VGA_TEST_MODE_CONTROLLER_0_BASE 0x4000
+                                         ^
+playerstuff.h:21:47: note: in expansion of macro 'VGA_TEST_MODE_CONTROLLER_0_BASE'
+ static volatile struct VGA_STRUCT* vga_ctrl = VGA_TEST_MODE_CONTROLLER_0_BASE;
+                                               ^
+main.c: In function 'main':
+main.c:875:8: warning: unused variable 'a' [-Wunused-variable]
+  float a = 0;
+        ^
+main.c:874:8: warning: unused variable 'y' [-Wunused-variable]
+  float y = 0;
+        ^
+main.c:873:8: warning: unused variable 'x' [-Wunused-variable]
+  float x = 0;
+        ^
+main.c:872:7: warning: unused variable 'keycode' [-Wunused-variable]
+  WORD keycode;
+       ^
+In file included from main.c:20:0:
+main.c: At top level:
+playerstuff.h:21:36: warning: 'vga_ctrl' defined but not used [-Wunused-variable]
+ static volatile struct VGA_STRUCT* vga_ctrl = VGA_TEST_MODE_CONTROLLER_0_BASE;
+                                    ^
+Info: Linking lab7retrial.elf
+nios2-elf-g++  -T'../lab7retrial_bsp//linker.x' -msys-crt0='../lab7retrial_bsp//obj/HAL/src/crt0.o' -msys-lib=hal_bsp -L../lab7retrial_bsp/   -Wl,-Map=lab7retrial.map   -O0 -g -Wall   -mno-hw-div -mno-hw-mul -mno-hw-mulx -mgpopt=global  -o lab7retrial.elf obj/default/main.o obj/default/usb_kb/HID.o obj/default/usb_kb/transfer.o -lm -msys-lib=m
+obj/default/main.o: In function `main':
+C:\Users\prart\Desktop\LAB7RETRY\software\lab7retrial/main.c:877: undefined reference to `MAX3421E_init'
+C:\Users\prart\Desktop\LAB7RETRY\software\lab7retrial/main.c:884: undefined reference to `MAX3421E_Task'
+C:\Users\prart\Desktop\LAB7RETRY\software\lab7retrial/main.c:1004: undefined reference to `MAX3421E_init'
+C:\Users\prart\Desktop\LAB7RETRY\software\lab7retrial/main.c:1010: undefined reference to `raycast'
+obj/default/usb_kb/HID.o: In function `mousePoll':
+C:\Users\prart\Desktop\LAB7RETRY\software\lab7retrial/usb_kb/HID.c:210: undefined reference to `MAXreg_wr'
+obj/default/usb_kb/HID.o: In function `kbdPoll':
+C:\Users\prart\Desktop\LAB7RETRY\software\lab7retrial/usb_kb/HID.c:218: undefined reference to `MAXreg_wr'
+obj/default/usb_kb/transfer.o: In function `XferCtrlReq':
+C:\Users\prart\Desktop\LAB7RETRY\software\lab7retrial/usb_kb/transfer.c:86: undefined reference to `MAXreg_wr'
+C:\Users\prart\Desktop\LAB7RETRY\software\lab7retrial/usb_kb/transfer.c:98: undefined reference to `MAXbytes_wr'
+obj/default/usb_kb/transfer.o: In function `XferDispatchPkt':
+C:\Users\prart\Desktop\LAB7RETRY\software\lab7retrial/usb_kb/transfer.c:151: undefined reference to `MAXreg_wr'
+C:\Users\prart\Desktop\LAB7RETRY\software\lab7retrial/usb_kb/transfer.c:154: undefined reference to `MAXreg_rd'
+C:\Users\prart\Desktop\LAB7RETRY\software\lab7retrial/usb_kb/transfer.c:156: undefined reference to `MAXreg_wr'
+C:\Users\prart\Desktop\LAB7RETRY\software\lab7retrial/usb_kb/transfer.c:164: undefined reference to `MAXreg_rd'
+obj/default/usb_kb/transfer.o: In function `XferInTransfer':
+C:\Users\prart\Desktop\LAB7RETRY\software\lab7retrial/usb_kb/transfer.c:198: undefined reference to `MAXreg_wr'
+C:\Users\prart\Desktop\LAB7RETRY\software\lab7retrial/usb_kb/transfer.c:206: undefined reference to `MAXreg_rd'
+C:\Users\prart\Desktop\LAB7RETRY\software\lab7retrial/usb_kb/transfer.c:209: undefined reference to `MAXreg_rd'
+C:\Users\prart\Desktop\LAB7RETRY\software\lab7retrial/usb_kb/transfer.c:211: undefined reference to `MAXbytes_rd'
+C:\Users\prart\Desktop\LAB7RETRY\software\lab7retrial/usb_kb/transfer.c:212: undefined reference to `MAXreg_wr'
+C:\Users\prart\Desktop\LAB7RETRY\software\lab7retrial/usb_kb/transfer.c:218: undefined reference to `MAXreg_rd'
+obj/default/usb_kb/transfer.o: In function `USB_Task':
+C:\Users\prart\Desktop\LAB7RETRY\software\lab7retrial/usb_kb/transfer.c:266: undefined reference to `MAXreg_wr'
+C:\Users\prart\Desktop\LAB7RETRY\software\lab7retrial/usb_kb/transfer.c:286: undefined reference to `MAXreg_wr'
+C:\Users\prart\Desktop\LAB7RETRY\software\lab7retrial/usb_kb/transfer.c:287: undefined reference to `MAXreg_wr'
+C:\Users\prart\Desktop\LAB7RETRY\software\lab7retrial/usb_kb/transfer.c:291: undefined reference to `MAXreg_rd'
+C:\Users\prart\Desktop\LAB7RETRY\software\lab7retrial/usb_kb/transfer.c:292: undefined reference to `MAXreg_rd'
+C:\Users\prart\Desktop\LAB7RETRY\software\lab7retrial/usb_kb/transfer.c:293: undefined reference to `MAXreg_wr'
+C:\Users\prart\Desktop\LAB7RETRY\software\lab7retrial/usb_kb/transfer.c:298: undefined reference to `MAXreg_rd'
+collect2.exe: error: ld returned 1 exit status
+make: *** [lab7retrial.elf] Error 1
+
+23:50:34 Build Finished (took 1s.16ms)
+

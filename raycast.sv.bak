@@ -1,0 +1,27 @@
+module raycast (input logic [31:0] player_x,input logic [31:0] player_y, input logic [31:0] player_a, input logic [10:0] col, output logic signed [8:0] depth);
+
+assign logic hitwall = 0;
+assign logic [8:0] Distwall = 0;
+logic signed [31:0] fOff;
+sin si (.angle(fOffsetfov), .val(eyex));
+cos co (.angle(fOffsetfov), .val(eyey));
+
+assign fOff = (player_a - 1440) + (((col<<5)*9)>>5);
+if(fOff[31] == 1) {
+	assign fOffsetfov = fOff + 12'd11520;
+}
+always_comb begin
+while(hitwall == 0 && Distwall < 512)begin
+		Distwall = Distwall + 8;
+		logic [31:0] testx = (player_x + ((eyex * Distwall)>>5))>>5;
+		logic [31:0] testy = (player_y + ((eyey * Distwall)>>5))>>5;
+		if(testx<0 || testx>=4'd8 || testy<0 || testy>=4'd8)begin
+		hitwall = 1;
+		Distwall = 10'd512;
+		end
+		else if (map_out == 1)begin
+		hitwall = 1;
+		end
+	end
+	depth = 7680 - 245760 / Distwall;
+end

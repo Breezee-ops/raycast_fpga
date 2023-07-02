@@ -1,0 +1,6 @@
+15:30:54 **** Incremental Build of configuration Nios II for project lab7 ****
+make all 
+make: *** No rule to make target `all'.  Stop.
+
+15:30:55 Build Finished (took 116ms)
+

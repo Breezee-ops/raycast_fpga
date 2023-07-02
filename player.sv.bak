@@ -1,0 +1,1 @@
+module drawplayer(logic[9:0]drawxsig, logic[9:0]drawysig, logic[9:0] playerx, playery)
